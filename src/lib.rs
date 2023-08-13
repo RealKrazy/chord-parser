@@ -212,6 +212,7 @@ impl ChordParser {
         // (dom/maj)13 = (dom/maj)9 + 13
         //
         // sus = sus4
+        // sus2/4 = sus2 + add9
         // sus13 = dom13 + sus4
 
         if self.is_one_of(&mut vec!["ma", "maj"], true)
@@ -299,6 +300,18 @@ impl ChordParser {
                             alters.set_suspension(&interval);
                         }
                         None => return None,
+                    }
+
+                    // sus2/4
+                    if let Some(s) = self.reader.try_read(2) {
+                        if s == "/4" || s == "\\4" {
+                            alters.set_note(&ChordNoteAlter 
+                                    { interval: AlteredInterval::Fourth, 
+                                      accidental: Accidental::Natural });
+                            continue;
+                        }
+
+                        self.reader.rollback(2).unwrap();
                     }
 
                     continue;
