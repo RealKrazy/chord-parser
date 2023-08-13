@@ -2,7 +2,7 @@
 
 Parser for musical chord signatures. Successful outputs return a parsed chord with a built-in abstract representation for chords.
 
-# Usage
+## Usage
 
 ```rust
 let mut parser = ChordParser::new();
@@ -19,6 +19,6 @@ let result = parser.parse("E7(b9,b13)");
 // Do something else...
 ```
 
-# Advanced
+## Advanced
 
 For more, visit the official [documentation](https://docs.rs/crate/chord-parser/latest/).
