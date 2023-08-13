@@ -845,6 +845,19 @@ mod tests {
             }
         };
 
+        match parser.parse("Csus2/4") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.alters().clone(), vec![ChordAlter::Suspended(
+                    AlteredInterval::Second,
+                ),
+                ChordAlter::Add(ChordNoteAlter {
+                    interval: AlteredInterval::Fourth,
+                    accidental: Accidental::Natural,
+                })]);
+            }
+        };
+
         match parser.parse("Csusb4") {
             ChordParseResult::Failure(ChordParseErrorKind::InvalidAlterations) => (),
             ChordParseResult::Failure(f) => panic!("Wrong failure, got: {:?}", f),
