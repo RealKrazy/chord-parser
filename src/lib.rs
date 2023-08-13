@@ -307,6 +307,10 @@ impl ChordParser {
                     // sus2/4
                     if let Some(s) = self.reader.try_read(2) {
                         if s == "/4" || s == "\\4" {
+                            if self.reader.is_end() == false {
+                                return None; // should end at "4"
+                            }
+
                             alters.set_note(&ChordNoteAlter 
                                     { interval: AlteredInterval::Fourth, 
                                       accidental: Accidental::Natural });
