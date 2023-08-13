@@ -4,7 +4,7 @@ description = "Utilities for parsing chord signatures"
 authors = ["Krazy Dev"]
 repository = "https://github.com/RealKrazy/chord-parser/"
 license = "MIT"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 
 [dependencies]
