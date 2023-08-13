@@ -3,12 +3,14 @@
 //! 
 //! # Simple Example
 //! ```
+//! use chord_parser::*;
+//! 
 //! let mut parser = ChordParser::new();
 //! 
 //! let result = parser.parse("Cmaj9");
 //! 
 //! match result {
-//!     ChordParseResult::Success(chord) => println!("{:?}", chord.seventh),
+//!     ChordParseResult::Success(chord) => println!("{:?}", chord.alterations.seventh),
 //!     ChordParseResult::Failure(kind) => panic!("Expected successful parse!"),
 //! };
 //! 
@@ -212,6 +214,7 @@ impl ChordParser {
         // (dom/maj)13 = (dom/maj)9 + 13
         //
         // sus = sus4
+        // sus2/4 = sus2 + add9
         // sus13 = dom13 + sus4
 
         if self.is_one_of(&mut vec!["ma", "maj"], true)
@@ -299,6 +302,22 @@ impl ChordParser {
                             alters.set_suspension(&interval);
                         }
                         None => return None,
+                    }
+
+                    // sus2/4
+                    if let Some(s) = self.reader.try_read(2) {
+                        if s == "/4" || s == "\\4" {
+                            if self.reader.is_end() == false {
+                                return None; // should end at "4"
+                            }
+
+                            alters.set_note(&ChordNoteAlter 
+                                    { interval: AlteredInterval::Fourth, 
+                                      accidental: Accidental::Natural });
+                            continue;
+                        }
+
+                        self.reader.rollback(2).unwrap();
                     }
 
                     continue;
@@ -829,6 +848,19 @@ mod tests {
                 ChordAlter::Suspended(
                     AlteredInterval::Fourth
                 )]);
+            }
+        };
+
+        match parser.parse("Csus2/4") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.alters().clone(), vec![ChordAlter::Suspended(
+                    AlteredInterval::Second,
+                ),
+                ChordAlter::Add(ChordNoteAlter {
+                    interval: AlteredInterval::Fourth,
+                    accidental: Accidental::Natural,
+                })]);
             }
         };
 
