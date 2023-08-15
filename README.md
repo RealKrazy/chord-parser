@@ -2,6 +2,13 @@
 
 Parser for musical chord signatures. Successful outputs return a parsed chord with a built-in abstract representation for chords.
 
+## Features
+
+- Full chord parsing with additional support for unicode symbols! (i.e. Δ, °)
+- Ambiguous notation to concrete notes conversion (maj13 -> maj7 + 9 + 13, sus -> sus4, etc.)
+- Input normalization (space trimming, etc.)
+- Fully documented and convenient to use!
+
 ## Usage
 
 ```rust
