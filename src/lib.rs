@@ -228,19 +228,12 @@ impl ChordParser {
             }
 
             match interval {
-                AlteredInterval::Sixth => { // preset for "6" and "6/9" chords
+                AlteredInterval::Sixth => {
                     alters.seventh = Seventh::None;
                     alters.set_note(&ChordNoteAlter {
                         interval: AlteredInterval::Sixth,
                         accidental: Accidental::Natural
                     });
-
-                    if self.is_one_of(&mut vec!["/9", "\\9"], false) {
-                        alters.set_note(&ChordNoteAlter {
-                            interval: AlteredInterval::Ninth,
-                            accidental: Accidental::Natural
-                        });
-                    }
                 }
                 AlteredInterval::Seventh => (),
                 AlteredInterval::Ninth =>
@@ -270,15 +263,19 @@ impl ChordParser {
                         None => return None,
                     };
 
+                    if let Some(_) = alters.get_note(&alter.interval) { // duplicate
+                        return None;
+                    }
+
                     alters.set_note(&alter);
                     continue;
                 } else if s.to_lowercase() == "sus" {
+                    if let Some(_) = alters.get_suspension() { // duplicate
+                        return None;
+                    }
                     if self.reader.is_end() {
                         alters.set_suspension(&AlteredInterval::Fourth);
                         break;
-                    }
-                    if let Some(_) = alters.get_suspension() { // duplicate
-                        return None;
                     }
 
                     let interval = self.try_read_interval();
@@ -304,22 +301,6 @@ impl ChordParser {
                         None => return None,
                     }
 
-                    // sus2/4
-                    if let Some(s) = self.reader.try_read(2) {
-                        if s == "/4" || s == "\\4" {
-                            if self.reader.is_end() == false {
-                                return None; // should end at "4"
-                            }
-
-                            alters.set_note(&ChordNoteAlter 
-                                    { interval: AlteredInterval::Fourth, 
-                                      accidental: Accidental::Natural });
-                            continue;
-                        }
-
-                        self.reader.rollback(2).unwrap();
-                    }
-
                     continue;
                 }
 
@@ -335,7 +316,9 @@ impl ChordParser {
                 continue;
             }
 
-            if self.reader.next().unwrap() == '(' { // alteration enumeration
+            let ch = self.reader.next().unwrap();
+
+            if ch == '(' { // alteration enumeration
                 while self.reader.is_end() == false {
                     if self.is_one_of(&mut vec!["ma", "maj"], true) ||
                        self.is_one_of(&mut vec!["Δ", "M"], false) { // must be maj7
@@ -377,6 +360,18 @@ impl ChordParser {
                     }
                 }
 
+                continue;
+            } else if ch == '/' || ch == '\\' {
+                let alter = match self.try_read_note_alter(false) {
+                    Some(alter) => alter,
+                    None => return None,
+                };
+
+                if let Some(_) = alters.get_note(&alter.interval) { // duplicate
+                    return None;
+                }
+
+                alters.set_note(&alter);
                 continue;
             }
 
