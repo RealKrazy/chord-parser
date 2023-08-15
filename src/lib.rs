@@ -82,8 +82,13 @@ impl ChordParser {
         ChordParser::new().parse(s)
     }
 
+    fn normalize_input(&self, s: &str) -> String {
+        s.chars().filter(|c| !c.is_whitespace()).collect()
+    }
+
     fn new_reader(&mut self, s: &str) {
-        self.reader = TextReader::from_text(s);
+        let normalized = self.normalize_input(s);
+        self.reader = TextReader::from_text(normalized.as_str());
     }
 
     fn try_read_number(&mut self) -> Option<usize> {
@@ -835,7 +840,7 @@ mod tests {
     fn chord_alteration_parsing_add() {
         let mut parser = ChordParser::new();
 
-        match parser.parse("Cadd9") {
+        match parser.parse("C add 9") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.alters().clone(), vec![ChordAlter::Add(ChordNoteAlter 
@@ -846,7 +851,7 @@ mod tests {
             }
         };
 
-        match parser.parse("Cadd+9addbb4") {
+        match parser.parse("C add +9 add b b4") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.alters().clone(), vec![ChordAlter::Add(ChordNoteAlter 
