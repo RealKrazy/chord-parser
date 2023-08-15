@@ -307,6 +307,24 @@ impl ChordParser {
                 self.reader.rollback(3).unwrap();
             }
 
+            if self.is_one_of(&mut vec!["no", "no."], true) {
+                if alters.no != No::None { // duplicate
+                    return None;
+                }
+
+                let interval = match self.try_read_number() {
+                    Some(num) => match num {
+                        3 => No::Third,
+                        5 => No::Fifth,
+                        _ => return None,
+                    },
+                    None => return None,
+                };
+
+                alters.no = interval;
+                continue;
+            }
+
             if let Some(alter) = self.try_read_note_alter(true) {
                 if let Some(_) = alters.get_note(&alter.interval) {
                     return None;
