@@ -259,6 +259,8 @@ pub struct Alterations {
     pub no: No,
     /// Represents a seventh in the chord
     pub seventh: Seventh,
+    /// Represents the bass note override (slash chord)
+    pub slash: Option<Note>,
     
     alters: Vec<ChordAlter>,
 }
@@ -276,7 +278,7 @@ impl Alterations {
     /// alterations.set_suspension(&AlteredInterval::Fourth);
     /// ```
     pub fn new() -> Self {
-        Alterations { no: No::None, seventh: Seventh::None, alters: vec![] }
+        Alterations { no: No::None, seventh: Seventh::None, slash: None, alters: vec![] }
     }
 
     /// Returns a list of all the added alterations.
