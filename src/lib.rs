@@ -1020,7 +1020,19 @@ mod tests {
     fn chord_alteration_parsing_dom() {
         let mut parser = ChordParser::new();
 
-        match parser.parse("C7") {
+        match parser.parse("C2") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.seventh, Seventh::Flat);
+                assert_eq!(alterations.alters().clone(), vec![ChordAlter::Add(ChordNoteAlter 
+                    {
+                        interval: AlteredInterval::Second,
+                        accidental: Accidental::Natural,
+                })]);
+            }
+        };
+
+        match parser.parse("Cdom7") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.seventh, Seventh::Flat);
