@@ -404,6 +404,21 @@ impl ChordParser {
                         }
 
                         alters.seventh = Seventh::Major;
+                    } else if self.is_one_of(&mut vec!["no", "no."], true) {
+                        let interval = match self.try_read_number() {
+                            Some(num) => match num {
+                                3 => No::Third,
+                                5 => No::Fifth,
+                                _ => return None,
+                            },
+                            None => return None,
+                        };
+
+                        if alters.no != No::None { // duplicate
+                            return None;
+                        }
+
+                        alters.no = interval;
                     } else {
                         let alter = match self.try_read_note_alter(false) {
                             Some(alter) => alter,
@@ -413,7 +428,7 @@ impl ChordParser {
                         if alter.interval == AlteredInterval::Seventh {
                             alters.seventh = Seventh::Flat;
                         } else {
-                            if let Some(_) = alters.get_note(&alter.interval) {
+                            if let Some(_) = alters.get_note(&alter.interval) { // duplicate
                                 return None;
                             }
     
@@ -1204,7 +1219,7 @@ mod tests {
     fn chord_alteration_parsing_no() {
         let mut parser = ChordParser::new();
 
-        match parser.parse("C7no3") {
+        match parser.parse("C7(no3)") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.seventh, Seventh::Flat);
