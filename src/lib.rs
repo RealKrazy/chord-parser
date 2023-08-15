@@ -428,25 +428,28 @@ impl ChordParser {
 
                 continue;
             } else if ch == '/' || ch == '\\' {
-                if let Some(note) = self.try_read_note() {
-                    if alters.slash != None { // duplicate
+                let alter = self.try_read_note_alter(false);
+
+                if let Some(alter) = alter {
+                    if let Some(_) = alters.get_note(&alter.interval) { // duplicate
                         return None;
                     }
-
-                    alters.slash = Some(note);
+    
+                    alters.set_note(&alter);
                     continue;
                 }
 
-                let alter = match self.try_read_note_alter(false) {
-                    Some(alter) => alter,
+                // slash chord
+                let note = match self.try_read_note() {
+                    Some(note) => note,
                     None => return None,
                 };
 
-                if let Some(_) = alters.get_note(&alter.interval) { // duplicate
+                if alters.slash != None { // duplicate
                     return None;
                 }
 
-                alters.set_note(&alter);
+                alters.slash = Some(note);
                 continue;
             }
 
@@ -1186,6 +1189,27 @@ mod tests {
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.seventh, Seventh::Flat);
                 assert_eq!(alterations.no, No::Third);
+            }
+        }
+
+        match parser.parse("Fmaj11no5") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.seventh, Seventh::Major);
+                assert_eq!(alterations.no, No::Fifth);
+            }
+        }
+    }
+
+    #[test]
+    fn chord_alteration_parsing_slash() {
+        let mut parser = ChordParser::new();
+
+        match parser.parse("C7/9/E") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.seventh, Seventh::Flat);
+                assert_eq!(alterations.slash, Some(Note { pitch: Pitch::E, accidental: Accidental::Natural }));
             }
         }
 
