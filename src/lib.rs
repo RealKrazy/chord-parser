@@ -271,6 +271,10 @@ impl ChordParser {
             alters.seventh = Seventh::Major;
         }
 
+        if self.is_one_of(&mut vec!["dom"], true) {
+            alters.seventh = Seventh::Flat;
+        }
+
         if let Some(interval) = self.try_read_interval() {
             if alters.seventh == Seventh::None {
                 alters.seventh = Seventh::Flat;
