@@ -256,6 +256,7 @@ impl ChordParser {
         let mut alters = Alterations::new();
 
         // ambiguous notation conversion rules:
+        // (dom/maj)2 = (dom/maj)7 + 2
         // (dom/maj)7 = (dom/maj)7 (no conversion; not ambiguous)
         // (dom/maj)9 = (dom/maj)7 + 9
         // (dom/maj)11 = (dom/maj)7 + sus4 (might be a bit controversial but this is most common)
@@ -276,6 +277,9 @@ impl ChordParser {
             }
 
             match interval {
+                AlteredInterval::Second => alters.set_note(&ChordNoteAlter 
+                    { interval: AlteredInterval::Second,
+                      accidental: Accidental::Natural }),
                 AlteredInterval::Sixth => {
                     alters.seventh = Seventh::None;
                     alters.set_note(&ChordNoteAlter {
