@@ -217,8 +217,8 @@ impl ChordParser {
         // sus2/4 = sus2 + add9
         // sus13 = dom13 + sus4
 
-        if self.is_one_of(&mut vec!["ma", "maj"], true)
-        || self.is_one_of(&mut vec!["M"], false) {
+        if self.is_one_of(&mut vec!["Δ7", "ma", "maj"], true)
+        || self.is_one_of(&mut vec!["Δ", "M"], false) {
             alters.seventh = Seventh::Major;
         }
 
@@ -338,7 +338,7 @@ impl ChordParser {
             if self.reader.next().unwrap() == '(' { // alteration enumeration
                 while self.reader.is_end() == false {
                     if self.is_one_of(&mut vec!["ma", "maj"], true) ||
-                       self.is_one_of(&mut vec!["M"], false) { // must be maj7
+                       self.is_one_of(&mut vec!["Δ", "M"], false) { // must be maj7
                         if self.reader.is_end() || self.reader.next().unwrap() != '7' {
                             return None;
                         }
@@ -391,7 +391,7 @@ impl ChordParser {
         // *nothing, ("M", "ma", "maj") (- followed by nothing) -> Major
         // "m", "mi", "min", "-" -> Minor
         // "+", "aug" -> Augmented
-        // "dim" -> Diminished
+        // "dim", "°", "o" -> Diminished
 
         if self.reader.is_end() {
             return ChordTriadType::Major;
@@ -461,6 +461,9 @@ impl ChordParser {
             if self.reader.is_end() {
                 return ChordTriadType::Major;
             }
+        }
+        if fst == '°' || fst == 'o' {
+            return ChordTriadType::Diminished;
         }
 
         self.reader.rollback(1).unwrap();
