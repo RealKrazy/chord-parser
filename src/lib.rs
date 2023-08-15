@@ -1166,6 +1166,27 @@ mod tests {
     }
 
     #[test]
+    fn chord_alteration_parsing_no() {
+        let mut parser = ChordParser::new();
+
+        match parser.parse("C7no3") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.seventh, Seventh::Flat);
+                assert_eq!(alterations.no, No::Third);
+            }
+        }
+
+        match parser.parse("Fmaj11no5") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.seventh, Seventh::Major);
+                assert_eq!(alterations.no, No::Fifth);
+            }
+        }
+    }
+
+    #[test]
     fn chord_alteration_parsing_mix() {
         let mut parser = ChordParser::new();
 
