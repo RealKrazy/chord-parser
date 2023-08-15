@@ -184,6 +184,54 @@ impl ChordParser {
         Some(ChordNoteAlter { accidental, interval })
     }
 
+    fn try_read_note(&mut self) -> Option<Note> {
+        let note = match self.reader.next() {
+            Some(note) => note,
+            None => return None,
+        };
+
+        let pitch = match Pitch::from_char(&note) {
+            Some(pitch) => pitch,
+            None => {
+                self.reader.rollback(1).unwrap();
+                return None;
+            }
+        };
+
+        let accidental = match self.reader.is_end() {
+            true => Accidental::Natural,
+            false => {
+                let fst = self.reader.next().unwrap();
+
+                if let Some(res) = Accidental::from_str(&fst.to_string()) {
+                    if self.reader.is_end() {
+                        res
+                    } else {
+                        let snd = self.reader.next().unwrap();
+                        let mut full = String::new();
+
+                        full.push(fst);
+                        full.push(snd);
+
+                        if let Some(res) = Accidental::from_str(&full) {
+                            res
+                        } else {
+                            self.reader.rollback(1).unwrap();
+
+                            res
+                        }
+                    }
+                } else {
+                    self.reader.rollback(1).unwrap();
+
+                    Accidental::Natural
+                }
+            }
+        };
+
+        Some(Note { pitch, accidental })
+    }
+
     fn is_one_of(&mut self, elems: &mut Vec<&str>, insensitive: bool) -> bool {
         elems.sort_by(|&a, &b| a.chars().count().cmp(&b.chars().count()));
         elems.reverse();                                                    // make sure we start with the longest one
@@ -380,6 +428,15 @@ impl ChordParser {
 
                 continue;
             } else if ch == '/' || ch == '\\' {
+                if let Some(note) = self.try_read_note() {
+                    if alters.slash != None { // duplicate
+                        return None;
+                    }
+
+                    alters.slash = Some(note);
+                    continue;
+                }
+
                 let alter = match self.try_read_note_alter(false) {
                     Some(alter) => alter,
                     None => return None,
@@ -484,51 +541,6 @@ impl ChordParser {
         ChordTriadType::Major
     }
 
-    fn parse_root_note(&mut self) -> Option<Note> {
-        let note = match self.reader.next() {
-            Some(note) => note,
-            None => return None,
-        };
-
-        let pitch = match Pitch::from_char(&note) {
-            Some(pitch) => pitch,
-            None => return None,
-        };
-
-        let accidental = match self.reader.is_end() {
-            true => Accidental::Natural,
-            false => {
-                let fst = self.reader.next().unwrap();
-
-                if let Some(res) = Accidental::from_str(&fst.to_string()) {
-                    if self.reader.is_end() {
-                        res
-                    } else {
-                        let snd = self.reader.next().unwrap();
-                        let mut full = String::new();
-
-                        full.push(fst);
-                        full.push(snd);
-
-                        if let Some(res) = Accidental::from_str(&full) {
-                            res
-                        } else {
-                            self.reader.rollback(1).unwrap();
-
-                            res
-                        }
-                    }
-                } else {
-                    self.reader.rollback(1).unwrap();
-
-                    Accidental::Natural
-                }
-            }
-        };
-
-        Some(Note { pitch, accidental })
-    }
-
     /// Parse a chord signature from a string slice.
     /// 
     /// # Examples
@@ -547,7 +559,7 @@ impl ChordParser {
     pub fn parse(&mut self, s: &str) -> ChordParseResult {
         self.new_reader(s);
 
-        let note = match self.parse_root_note() {
+        let note = match self.try_read_note() {
             Some(note) => note,
             None => return ChordParseResult::Failure(ChordParseErrorKind::InvalidRoot),
         };
