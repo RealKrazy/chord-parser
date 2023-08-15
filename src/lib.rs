@@ -185,18 +185,18 @@ impl ChordParser {
     }
 
     fn is_one_of(&mut self, elems: &mut Vec<&str>, insensitive: bool) -> bool {
-        elems.sort_by(|&a, &b| a.len().cmp(&b.len()));
+        elems.sort_by(|&a, &b| a.chars().count().cmp(&b.chars().count()));
         elems.reverse();                                                    // make sure we start with the longest one
                                                                             // to account for potential substring options
 
         for &el in elems.iter() {
-            if let Some(s) = self.reader.try_read(el.len()) {
+            if let Some(s) = self.reader.try_read(el.chars().count()) {
                 if insensitive && el.to_lowercase() == s.to_lowercase() {
                     return true;
                 } else if insensitive == false && el == s {
                     return true;
                 } else {
-                    self.reader.rollback(el.len()).unwrap();
+                    self.reader.rollback(el.chars().count()).unwrap();
                 }
             }
         }
@@ -217,8 +217,8 @@ impl ChordParser {
         // sus2/4 = sus2 + add9
         // sus13 = dom13 + sus4
 
-        if self.is_one_of(&mut vec!["Δ7", "ma", "maj"], true)
-        || self.is_one_of(&mut vec!["Δ", "M"], false) {
+        if self.is_one_of(&mut vec!["Δ", "ma", "maj"], true)
+        || self.is_one_of(&mut vec!["M"], false) {
             alters.seventh = Seventh::Major;
         }
 
@@ -758,6 +758,20 @@ mod tests {
             }
         };
 
+        match parser.parse("C°7") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { chord_type, .. }) => {
+                assert_eq!(chord_type, ChordTriadType::Diminished);
+            }
+        };
+
+        match parser.parse("Co7") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { chord_type, .. }) => {
+                assert_eq!(chord_type, ChordTriadType::Diminished);
+            }
+        };
+
         match parser.parse("Cdim7") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { chord_type, .. }) => {
@@ -892,7 +906,7 @@ mod tests {
             }
         };
 
-        match parser.parse("Cmaj9") {
+        match parser.parse("CΔ9") {
             ChordParseResult::Failure(_) => panic!("Expected success"),
             ChordParseResult::Success(Chord { alterations, .. }) => {
                 assert_eq!(alterations.seventh, Seventh::Major);
