@@ -806,6 +806,28 @@ mod tests {
             }
         };
 
+        match parser.parse("C/+9/bb11/13") {
+            ChordParseResult::Failure(_) => panic!("Expected success"),
+            ChordParseResult::Success(Chord { alterations, .. }) => {
+                assert_eq!(alterations.alters().clone(), vec![ChordAlter::Add(ChordNoteAlter 
+                    {
+                        interval: AlteredInterval::Ninth,
+                        accidental: Accidental::Sharp,
+                }),
+                ChordAlter::Add(
+                    ChordNoteAlter {
+                        interval: AlteredInterval::Eleventh,
+                        accidental: Accidental::DoubleFlat,
+                }),
+                ChordAlter::Add(
+                    ChordNoteAlter {
+                        interval: AlteredInterval::Thirteenth,
+                        accidental: Accidental::Natural,
+                    }
+                )]);
+            }
+        };
+
         match parser.parse("Cadd") {
             ChordParseResult::Failure(ChordParseErrorKind::InvalidAlterations) => (),
             ChordParseResult::Failure(f) => panic!("Wrong failure, got: {:?}", f),
