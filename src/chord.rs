@@ -237,12 +237,27 @@ pub enum ChordAlter {
     Suspended(AlteredInterval),
 }
 
+/// Represents a "no." notation of chords that a tone is missing.
+/// 
+/// "5" chords are technically "no3" chords.
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub enum No {
+    /// "no." is not present in a chord
+    None,
+    /// Omit 3rd. "no3"
+    Third,
+    /// Omit 5th. "no5"
+    Fifth,
+}
+
 /// Represents a list of all the alterations presented in a chord.
 /// 
 /// This struct provides a simple and intuitive way to add alterations using the safe included methods.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Alterations {
-    /// Represents a seventh in a chord
+    /// Represents an omitted tone in the
+    pub no: No,
+    /// Represents a seventh in the chord
     pub seventh: Seventh,
     
     alters: Vec<ChordAlter>,
@@ -261,7 +276,7 @@ impl Alterations {
     /// alterations.set_suspension(&AlteredInterval::Fourth);
     /// ```
     pub fn new() -> Self {
-        Alterations { seventh: Seventh::None, alters: vec![] }
+        Alterations { no: No::None, seventh: Seventh::None, alters: vec![] }
     }
 
     /// Returns a list of all the added alterations.
