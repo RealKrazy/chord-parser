@@ -289,6 +289,7 @@ impl ChordParser {
                 AlteredInterval::Second => alters.set_note(&ChordNoteAlter 
                     { interval: AlteredInterval::Second,
                       accidental: Accidental::Natural }),
+                AlteredInterval::Fifth => alters.no = No::Third, // no3 chords
                 AlteredInterval::Sixth => {
                     alters.seventh = Seventh::None;
                     alters.set_note(&ChordNoteAlter {
