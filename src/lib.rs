@@ -261,6 +261,8 @@ impl ChordParser {
         let mut alters = Alterations::new();
 
         // ambiguous notation conversion rules:
+        // 5 = no3
+        //
         // (dom/maj)2 = (dom/maj)7 + 2
         // (dom/maj)7 = (dom/maj)7 (no conversion; not ambiguous)
         // (dom/maj)9 = (dom/maj)7 + 9
