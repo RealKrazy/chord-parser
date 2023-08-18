@@ -611,6 +611,48 @@ impl ChordParser {
             alterations,
         })
     }
+
+    /// Tries to parse the interval from a string slice.
+    /// 
+    /// # Examples
+    /// ```
+    /// use chord_parser::*;
+    /// 
+    /// let mut parser = ChordParser::new();
+    /// 
+    /// let result = parser.try_parse_interval("13");
+    /// 
+    /// match result {
+    ///     Some(interval) => println!("Interval is: {:?}", interval),
+    ///     None => panic!("Expected success!"),
+    /// }
+    /// ```
+    pub fn try_parse_interval(&mut self, s: &str) -> Option<AlteredInterval> {
+        self.new_reader(s);
+
+        self.try_read_interval()
+    }
+
+    /// Tries to parse the note alteration from a string slice.
+    /// 
+    /// # Examples
+    /// ```
+    /// use chord_parser::*;
+    /// 
+    /// let mut parser = ChordParser::new();
+    /// 
+    /// let result = parser.try_parse_note_alter("b13", true);
+    /// 
+    /// match result {
+    ///     Some(alter) => println!("Alteration is: {:?}", alter),
+    ///     None => panic!("Forgot an accidental?"),
+    /// }
+    /// ``` 
+    pub fn try_parse_note_alter(&mut self, s: &str, require_accidental: bool) -> Option<ChordNoteAlter> {
+        self.new_reader(s);
+
+        self.try_read_note_alter(require_accidental)
+    }
 }
 
 #[cfg(test)]
