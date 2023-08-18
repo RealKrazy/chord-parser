@@ -45,6 +45,20 @@ impl Pitch {
     }
 }
 
+impl ToString for Pitch {
+    fn to_string(&self) -> String {
+        match self {
+            Self::A => "A".into(),
+            Self::B => "B".into(),
+            Self::C => "C".into(),
+            Self::D => "D".into(),
+            Self::E => "E".into(),
+            Self::F => "F".into(),
+            Self::G => "G".into(),
+        }
+    }
+}
+
 /// Represents an accidental alteration on a note.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum Accidental {
@@ -122,6 +136,18 @@ impl Accidental {
     }
 }
 
+impl ToString for Accidental {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Natural => "♮".into(),
+            Self::Sharp => "♯".into(),
+            Self::DoubleSharp => "𝄪".into(),
+            Self::Flat => "♭".into(),
+            Self::DoubleFlat => "𝄫".into(),
+        }
+    }
+}
+
 /// Represents a chord note.
 /// 
 /// # Note
@@ -134,6 +160,15 @@ pub struct Note {
     pub pitch: Pitch,
     /// The accidental of the note
     pub accidental: Accidental,
+}
+
+impl ToString for Note {
+    fn to_string(&self) -> String {
+        let mut s = self.pitch.to_string();
+        s.push_str(self.accidental.to_string().as_str());
+
+        s
+    }
 }
 
 /// Represents a triad type of a chord.
@@ -155,6 +190,17 @@ pub enum ChordTriadType {
     Diminished,
 }
 
+impl ToString for ChordTriadType {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Major => "".into(),
+            Self::Minor => "m".into(),
+            Self::Augmented => "aug".into(),
+            Self::Diminished => "dim".into(),
+        }
+    }
+}
+
 /// Represents the type of seventh in a chord. Usually a part of [`Alterations`] struct.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum Seventh {
@@ -164,6 +210,16 @@ pub enum Seventh {
     Flat,
     /// Major (sharpened) seventh. In a chord signature - "maj7".
     Major,
+}
+
+impl ToString for Seventh {
+    fn to_string(&self) -> String {
+        match self {
+            Self::None => "".into(),
+            Self::Flat => "7".into(),
+            Self::Major => "maj7".into(),
+        }
+    }
 }
 
 /// Represents the interval of an alteration. Used in [`ChordAlter`] enum.
@@ -217,6 +273,22 @@ impl AlteredInterval {
     }
 }
 
+impl ToString for AlteredInterval {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Second => "2".into(),
+            Self::Fourth => "4".into(),
+            Self::Fifth => "5".into(),
+            Self::Sixth => "6".into(),
+            Self::Seventh => "7".into(),
+            Self::Ninth => "9".into(),
+            Self::Tenth => "10".into(),
+            Self::Eleventh => "11".into(),
+            Self::Thirteenth => "13".into(),
+        }
+    }
+}
+
 /// Represents an ålteration of a note
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct ChordNoteAlter {
@@ -224,6 +296,15 @@ pub struct ChordNoteAlter {
     pub interval: AlteredInterval,
     /// The new accidental of the interval note
     pub accidental: Accidental,
+}
+
+impl ToString for ChordNoteAlter {
+    fn to_string(&self) -> String {
+        let mut s = self.interval.to_string();
+        s.push_str(self.accidental.to_string().as_str());
+
+        s
+    }
 }
 
 /// Represents an alteration in a chord.
@@ -237,6 +318,19 @@ pub enum ChordAlter {
     Suspended(AlteredInterval),
 }
 
+impl ToString for ChordAlter {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Add(alter) => {
+                "add".to_string() + alter.to_string().as_str()
+            }
+            Self::Suspended(interval) => {
+                "sus".to_string() + interval.to_string().as_str()
+            }
+        }
+    }
+}
+
 /// Represents a "no." notation of chords that a tone is missing.
 /// 
 /// "5" chords are technically "no3" chords.
@@ -248,6 +342,16 @@ pub enum No {
     Third,
     /// Omit 5th. "no5"
     Fifth,
+}
+
+impl ToString for No {
+    fn to_string(&self) -> String {
+        match &self {
+            Self::None => "".into(),
+            Self::Third => "no3".into(),
+            Self::Fifth => "no5".into(),
+        }
+    }
 }
 
 /// Represents a list of all the alterations presented in a chord.
@@ -448,6 +552,22 @@ impl Alterations {
     }
 }
 
+impl ToString for Alterations {
+    fn to_string(&self) -> String {
+        let mut s = self.no.to_string();
+        s.push_str(self.seventh.to_string().as_str());
+
+        self.alters.iter().for_each(|a| s.push_str(a.to_string().as_str()));
+
+        if let Some(slash) = &self.slash {
+            let slash_str = "/".to_string() + slash.to_string().as_str();
+            s.push_str(slash_str.as_str());
+        }
+
+        s
+    }
+}
+
 /// Represents a full chord signature.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Chord {
@@ -457,6 +577,16 @@ pub struct Chord {
     pub chord_type: ChordTriadType,
     /// Alterations
     pub alterations: Alterations,
+}
+
+impl ToString for Chord {
+    fn to_string(&self) -> String {
+        let mut s = self.note.to_string();
+        s.push_str(self.chord_type.to_string().as_str());
+        s.push_str(self.alterations.to_string().as_str());
+
+        s
+    }
 }
 
 #[cfg(test)]
