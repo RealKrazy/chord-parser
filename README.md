@@ -19,7 +19,7 @@ let mut parser = ChordParser::new();
 let result = parser.parse("Cmaj9");
  
 match result {
-    ChordParseResult::Success(chord) => println!("{:?}", chord.alteraations.seventh),
+    ChordParseResult::Success(chord) => println!("{:?}", chord.alterations.seventh),
     ChordParseResult::Failure(kind) => panic!("Expected successful parse!"),
 };
  
